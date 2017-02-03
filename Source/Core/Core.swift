@@ -328,7 +328,7 @@ public enum EurekaError : Error {
 *  A protocol implemented by FormViewController
 */
 public protocol FormViewControllerProtocol {
-    var tableView: UITableView? { get }
+    var tableView: UITableView! { get }
     
     func beginEditing<T:Equatable>(of: Cell<T>)
     func endEditing<T:Equatable>(of: Cell<T>)
@@ -409,7 +409,7 @@ public struct InlineRowHideOptions : OptionSet {
 /// View controller that shows a form.
 open class FormViewController : UIViewController, FormViewControllerProtocol {
     
-    @IBOutlet public var tableView: UITableView?
+    @IBOutlet public var tableView: UITableView!
     
     private lazy var _form : Form = { [weak self] in
         let form = Form()
@@ -460,47 +460,46 @@ open class FormViewController : UIViewController, FormViewControllerProtocol {
     open override func viewDidLoad() {
         super.viewDidLoad()
         navigationAccessoryView = NavigationAccessoryView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 44.0))
-        navigationAccessoryView.tintColor = view.tintColor
         navigationAccessoryView.autoresizingMask = .flexibleWidth
         
         if tableView == nil {
             tableView = UITableView(frame: view.bounds, style: tableViewStyle)
-            tableView?.autoresizingMask = UIViewAutoresizing.flexibleWidth.union(.flexibleHeight)
+            tableView.autoresizingMask = UIViewAutoresizing.flexibleWidth.union(.flexibleHeight)
             if #available(iOS 9.0, *){
-                tableView?.cellLayoutMarginsFollowReadableWidth = false
+                tableView.cellLayoutMarginsFollowReadableWidth = false
             }
         }
-        if tableView?.superview == nil {
-            view.addSubview(tableView!)
+        if tableView.superview == nil {
+            view.addSubview(tableView)
         }
-        if tableView?.delegate == nil {
-            tableView?.delegate = self
+        if tableView.delegate == nil {
+            tableView.delegate = self
         }
-        if tableView?.dataSource == nil {
-            tableView?.dataSource = self
+        if tableView.dataSource == nil {
+            tableView.dataSource = self
         }
-        tableView?.estimatedRowHeight = BaseRow.estimatedRowHeight
+        tableView.estimatedRowHeight = BaseRow.estimatedRowHeight
     }
     
     open override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
 
-        let selectedIndexPaths = tableView?.indexPathsForSelectedRows ?? []
-        tableView?.reloadRows(at: selectedIndexPaths, with: .none)
+        let selectedIndexPaths = tableView.indexPathsForSelectedRows ?? []
+        tableView.reloadRows(at: selectedIndexPaths, with: .none)
         selectedIndexPaths.forEach {
-            tableView?.selectRow(at: $0, animated: false, scrollPosition: .none)
+            tableView.selectRow(at: $0, animated: false, scrollPosition: .none)
         }
 
         let deselectionAnimation = { [weak self] (context: UIViewControllerTransitionCoordinatorContext) in
             selectedIndexPaths.forEach {
-                self?.tableView?.deselectRow(at: $0, animated: context.isAnimated)
+                self?.tableView.deselectRow(at: $0, animated: context.isAnimated)
             }
         }
 
         let reselection = { [weak self] (context: UIViewControllerTransitionCoordinatorContext) in
             if context.isCancelled {
                 selectedIndexPaths.forEach {
-                    self?.tableView?.selectRow(at: $0, animated: false, scrollPosition: .none)
+                    self?.tableView.selectRow(at: $0, animated: false, scrollPosition: .none)
                 }
             }
         }
@@ -510,7 +509,7 @@ open class FormViewController : UIViewController, FormViewControllerProtocol {
         }
         else {
             selectedIndexPaths.forEach {
-                tableView?.deselectRow(at: $0, animated: false)
+                tableView.deselectRow(at: $0, animated: false)
             }
         }
 
@@ -818,7 +817,8 @@ extension FormViewController : UIScrollViewDelegate {
     //MARK: UIScrollViewDelegate
     
     open func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
-        tableView?.endEditing(true)
+        guard let tableView = tableView, scrollView === tableView else { return }
+        tableView.endEditing(true)
     }
 }
 
